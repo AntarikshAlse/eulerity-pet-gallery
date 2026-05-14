@@ -19,7 +19,6 @@ import {
   ErrorMessage,
 } from "../../components/StyledComponents";
 import type { Pet } from "../../types/pet";
-import { useSelection } from "../../providers/SelectionProviders";
 
 export default function PetDetailPage() {
   const { id } = useParams<{ id: string }>();

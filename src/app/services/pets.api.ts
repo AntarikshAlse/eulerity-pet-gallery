@@ -7,15 +7,10 @@ export async function getPets(): Promise<Pet[]> {
     throw new Error("Failed to fetch pets");
   }
 
-  return response.json();
-}
-
-export async function getPet(id: string): Promise<Pet> {
-  const response = await fetch(`/pets/${id}`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch pet");
-  }
-
-  return response.json();
+  const pets = await response.json();
+  // add ids locally
+  return pets.map((pet: Omit<Pet, "id">, index: number) => ({
+    ...pet,
+    id: index,
+  }));
 }

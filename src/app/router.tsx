@@ -7,7 +7,6 @@ import AboutPage from "./routes/about/AboutPage";
 import PetDetailPage from "./routes/petDetail/PetDetailPage";
 
 import { petsLoader } from "./routes/home/loader";
-import { petDetailLoader } from "./routes/petDetail/loader";
 
 export const router = createBrowserRouter([
   {
@@ -16,21 +15,26 @@ export const router = createBrowserRouter([
 
     children: [
       {
-        index: true,
-        element: <HomePage />,
+        id: "pets",
         loader: petsLoader,
-        errorElement: <div>error</div>,
-      },
 
-      {
-        path: "pets/:id",
-        element: <PetDetailPage />,
-        loader: petDetailLoader,
+        children: [
+          {
+            index: true,
+            element: <HomePage />,
+          },
+
+          {
+            path: "pets/:id",
+            element: <PetDetailPage />,
+          },
+        ],
       },
 
       {
         path: "about",
         element: <AboutPage />,
+        errorElement: <div>404</div>,
       },
     ],
   },

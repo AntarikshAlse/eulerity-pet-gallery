@@ -4,6 +4,7 @@ type SelectionContextType = {
   selectedIds: string[];
   toggleSelection: (id: string) => void;
   clearSelection: () => void;
+  selectAll: (ids: string[]) => void;
 };
 
 const SelectionContext = createContext<SelectionContextType | null>(null);
@@ -17,6 +18,10 @@ export function SelectionProvider({ children }: { children: React.ReactNode }) {
     );
   }
 
+  function selectAll(ids: string[]) {
+    setSelectedIds(ids);
+  }
+
   function clearSelection() {
     setSelectedIds([]);
   }
@@ -27,6 +32,7 @@ export function SelectionProvider({ children }: { children: React.ReactNode }) {
         selectedIds,
         toggleSelection,
         clearSelection,
+        selectAll,
       }}
     >
       {children}

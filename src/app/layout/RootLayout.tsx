@@ -1,12 +1,17 @@
 import { Outlet, NavLink } from "react-router-dom";
+import { Header, Subtitle } from "../components/StyledComponents";
 
 export default function RootLayout() {
   return (
     <>
-      <header>
-        <NavLink to="/">Home</NavLink>
-        <NavLink to="/about">About</NavLink>
-      </header>
+      <Header>
+        <NavLink to="/">
+          <Subtitle>Home</Subtitle>
+        </NavLink>
+        <NavLink to="/about">
+          <Subtitle>About</Subtitle>
+        </NavLink>
+      </Header>
 
       <main>
         <Outlet />

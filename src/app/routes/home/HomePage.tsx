@@ -1,65 +1,112 @@
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { useRouteLoaderData } from "react-router-dom";
 
 import { type Pet } from "../../types/pet";
-import GalleryGrid from "../../components/GalleryGrid";
 import { useSelection } from "../../providers/SelectionProviders";
+import {
+  Button,
+  Container,
+  ControlBar,
+  Header,
+  SearchInput,
+  SecondaryButton,
+  SortSelect,
+  Spinner,
+  Subtitle,
+  Title,
+} from "../../components/StyledComponents";
+import { useCallback, useMemo, useState } from "react";
+import { useInfinitePets } from "../../hooks/useInfinitePets";
+import GalleryGrid from "../../components/GalleryGrid";
 
+type SortOption = "name-asc" | "name-desc";
+
+const ITEMS_PER_BATCH = 4;
 export default function HomePage() {
-  const pets = useLoaderData() as Pet[];
-  const navigate = useNavigate();
+  const pets = useRouteLoaderData("pets") as Pet[];
+  const { clearSelection, selectAll } = useSelection();
 
-  const createSrcSet = (url: string) => {
-    const widths = [320, 640, 960, 1200];
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("name-asc");
+  const [displayCount, setDisplayCount] = useState(ITEMS_PER_BATCH);
 
-    return widths.map((width) => `${url}&w=${width} ${width}w`).join(", ");
+  // Filter pets based on search
+  const filteredPets = useMemo(() => {
+    return pets.filter(
+      (pet) =>
+        pet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pet.description.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+  }, [pets, searchTerm]);
+
+  // Sort pets
+  const sortedPets = useMemo(() => {
+    const sorted = [...filteredPets];
+    switch (sortBy) {
+      case "name-asc":
+        return sorted.sort((a, b) => a.title.localeCompare(b.title));
+      case "name-desc":
+        return sorted.sort((a, b) => b.title.localeCompare(a.title));
+      default:
+        return sorted;
+    }
+  }, [filteredPets, sortBy]);
+
+  // Display only up to displayCount
+  const displayedPets = sortedPets.slice(0, displayCount);
+  const hasMore = displayCount < sortedPets.length;
+
+  // Infinite scroll callback
+  const loadMore = useCallback(() => {
+    if (hasMore) {
+      setDisplayCount((prev) =>
+        Math.min(prev + ITEMS_PER_BATCH, sortedPets.length),
+      );
+    }
+  }, [hasMore, sortedPets.length]);
+
+  const observerTarget = useInfinitePets(loadMore);
+
+  const handleSelectAll = () => {
+    selectAll(filteredPets.map((p) => p.id));
   };
 
-  const { toggleSelection, selectedIds } = useSelection();
-  console.log("🚀 ~ HomePage ~ selectedIds:", selectedIds);
-
   return (
-    <GalleryGrid>
-      {pets.map((pet) => (
-        <article
-          key={pet.title}
-          style={{ cursor: "pointer", position: "relative" }}
-          onClick={() => {
-            navigate(pet.title);
+    <Container>
+      <Header>
+        <Title>🐾 Pet Gallery</Title>
+        <Subtitle>Browse and select your favorite pets</Subtitle>
+      </Header>
+
+      <ControlBar>
+        <SearchInput
+          type="text"
+          placeholder="Search by name or description..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+          }}
+        />
+        <SortSelect
+          value={sortBy}
+          onChange={(e) => {
+            setSortBy(e.target.value as SortOption);
           }}
         >
-          <div
-            style={{
-              background: `${selectedIds.includes(pet.title) ? "green" : "blue"}`,
-              borderRadius: "5px",
-              width: "10px",
-              padding: "5px",
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleSelection(pet.title);
-            }}
-          ></div>
-          <img
-            src={`${pet.url}&w=640`}
-            srcSet={createSrcSet(pet.url)}
-            sizes="(max-width: 768px) 100vw, 50vw"
-            alt={pet.title}
-            loading="lazy"
-            style={{
-              width: "100%",
-              maxHeight: "200px",
-              objectFit: "cover",
-              display: "block",
-            }}
-          />
-
-          <h1>{pet.title}</h1>
-          <p>{pet.description}</p>
-        </article>
-      ))}
-    </GalleryGrid>
+          <option value="name-asc">Name A-Z</option>
+          <option value="name-desc">Name Z-A</option>
+        </SortSelect>
+        <Button onClick={handleSelectAll}>Select All</Button>
+        <SecondaryButton onClick={clearSelection}>Clear</SecondaryButton>
+      </ControlBar>
+      <GalleryGrid pets={displayedPets} />
+      {hasMore && (
+        <div
+          ref={observerTarget}
+          style={{ padding: "20px", textAlign: "center" }}
+        >
+          <Spinner />
+        </div>
+      )}
+    </Container>
   );
 }

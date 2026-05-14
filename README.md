@@ -1,5 +1,5 @@
 Pet Gallery
-Modern React+TypeScript application for browsing, searching, and downloading pet images.
+Modern React+TypeScript application for browsing, searching.
 Features
 
 Architecture Decisions Made:

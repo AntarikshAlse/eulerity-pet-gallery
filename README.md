@@ -9,5 +9,4 @@ Architecture Decisions Made:
 - Routing: React Router v7 for SPA with /pets/:id detail routes
 - Data Flow: Custom hook pattern to separate concerns between UI and data fetching
 - Responsive Design: CSS Grid with media queries for 1/2/4 column layouts
-- Pagination: Server-side approach with 12 items per page
 - TypeScript: Full type safety with interfaces for Pet objects and context types
